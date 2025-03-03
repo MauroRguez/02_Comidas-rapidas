@@ -20,20 +20,17 @@ btnProducts.forEach((btn, i) => {
 
 //agregar producto al carrito
 function agregarProducto(producto) {
-    let fila = document.createElement('tr');
-    fila.innerHTML = `
-        <td>${listadoCarrito.children.length + 1}</td>
-        <td>
-            <img src="${producto.imagen}" width="70px">
-        </td>
-        <td>${producto.nombre}</td>
-        <td>$${producto.precio}</td>
-        <td>
-            <span onclick="borrarProducto(event)" class="btn btn-danger">X</span>
-        </td>
-    `;
+    let todosProductos = JSON.parse(localStorage.getItem('pro-carrito')) || [];
+    let productoExistente = todosProductos.find(p => p.nombre === producto.nombre);
 
-    listadoCarrito.appendChild(fila);
+    if (productoExistente) {
+        productoExistente.cantidad += producto.cantidad;
+    } else {
+        todosProductos.push(producto);
+    }
+
+    localStorage.setItem('pro-carrito', JSON.stringify(todosProductos));
+    cargarProLocalStorage();
 }
 
 //funcion para agregar la informacion del producto al carrito
@@ -46,14 +43,20 @@ function infoProducto(pos){
         cantidad: 1
     }
     agregarProducto(infoPro);
-    guardarProLocalStorage(infoPro);
 }
 
 function borrarProducto(event){
     let producto = event.target.parentElement.parentElement;
     let index = Array.from(listadoCarrito.children).indexOf(producto);
     producto.remove();
-    con--;
+
+    // Eliminar del local storage
+    let todosProductos = JSON.parse(localStorage.getItem('pro-carrito')) || [];
+    todosProductos.splice(index, 1);
+    localStorage.setItem('pro-carrito', JSON.stringify(todosProductos));
+
+    // Actualizar el contador del carrito
+    con = todosProductos.reduce((acc, producto) => acc + producto.cantidad, 0);
     contadorCarrito.textContent = con;
     guardarContadorCarrito();
 
@@ -62,8 +65,6 @@ function borrarProducto(event){
     filas.forEach((fila, index) => {
         fila.querySelector('td').textContent = index + 1;
     });
-
-    eliminarProLocalStorage(index);
 }
 
 function guardarProLocalStorage(producto){
@@ -81,9 +82,25 @@ function eliminarProLocalStorage(index){
 //cargar productos del localstorage
 function cargarProLocalStorage(){
     let todosProductos = JSON.parse(localStorage.getItem('pro-carrito')) || [];
-    todosProductos.forEach(producto => {
-        agregarProducto(producto);
+    listadoCarrito.innerHTML = ''; // Limpiar el listado antes de cargar
+
+    todosProductos.forEach((producto, index) => {
+        let fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td>${index + 1}</td>
+            <td>
+                <img src="${producto.imagen}" width="70px">
+            </td>
+            <td>${producto.nombre}</td>
+            <td>$${producto.precio}</td>
+            <td>${producto.cantidad}</td>
+            <td>
+                <span onclick="borrarProducto(event)" class="btn btn-danger">X</span>
+            </td>
+        `;
+        listadoCarrito.appendChild(fila);
     });
+
     con = todosProductos.length;
     contadorCarrito.textContent = con;
 }
@@ -95,7 +112,8 @@ function guardarContadorCarrito(){
 
 //cargar contador del carrito desde local storage
 function cargarContadorCarrito(){
-    con = parseInt(localStorage.getItem('contador-carrito')) || 0;
+    let todosProductos = JSON.parse(localStorage.getItem('pro-carrito')) || [];
+    con = todosProductos.reduce((acc, producto) => acc + producto.cantidad, 0);
     contadorCarrito.textContent = con;
 }
 
