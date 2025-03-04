@@ -1,5 +1,11 @@
 // variables globales
 let tablaCarrito = document.querySelector(".cart-table tbody");
+let resumenSubTotal = document.querySelector(".res-sub-total");
+let resumenDescuento = document.querySelector(".promo");
+let resumenTotal = document.querySelector(".total");
+let destino = document.querySelector(".destino");
+let resumenDomicilio = document.querySelector(".valor-domi");
+let btnResumen = document.querySelector(".btn-resumen");
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarProductos();
@@ -44,11 +50,11 @@ function cargarProductos() {
         `;
         tablaCarrito.appendChild(fila); // Agregar la fila al tbody
     }
+    resumenCompra(); // Llamar a resumenCompra después de cargar los productos
 }
 
 function actualizarCantidad(pos, cambio){
     let todosProductos = JSON.parse(localStorage.getItem("pro-carrito")) || [];
-
 
     if(todosProductos[pos]){
         todosProductos[pos].cantidad = (todosProductos[pos].cantidad || 1) + cambio;
@@ -58,11 +64,8 @@ function actualizarCantidad(pos, cambio){
         //calcula subtotal
         let subtotal = todosProductos[pos].precio * todosProductos[pos].cantidad;
     }
-localStorage.setItem("pro-carrito", JSON.stringify(todosProductos));
-cargarProductos();
-
-
-
+    localStorage.setItem("pro-carrito", JSON.stringify(todosProductos));
+    cargarProductos();
 }
 
 function borrarProducto(event) {
@@ -91,4 +94,71 @@ function borrarProducto(event) {
         `;
         tablaCarrito.appendChild(fila);
     }
+
+    // Ejecutar resumen de compra después de actualizar el localStorage y el DOM
+    resumenCompra();
 }
+
+//funcion para resumen de la compra
+function resumenCompra(){
+    let todosProductos = JSON.parse(localStorage.getItem("pro-carrito")) || [];
+
+    let subtotal = 0; // acumular el subtotal
+    // recorrer todos los productos y acumulamos en subtotal
+    todosProductos.forEach((producto) => {
+        subtotal += producto.precio * producto.cantidad;
+    });
+    // calcular valor del domicilio
+    let domicilio = 0;
+    switch(destino.value){
+        case "Medellin": default: domicilio; break;
+        case "Bello": 
+            domicilio = 10.000; 
+            break;
+        case "Copacabana":
+        case "La Estrella": 
+        case "Caldas":
+            domicilio = 20.000; 
+            break;
+        case "Itagui":
+        case "Envigado":
+        case "Sabaneta": 
+            domicilio = 15.000; 
+            break;
+    }
+    //calcular descuento del 10% si la compra es mayor a 100000 pesos
+    let descuento = (subtotal > 100.000)? subtotal * 0.1 : 0;
+
+    let totalApagar = (subtotal - descuento)+ domicilio;
+
+    resumenSubTotal.textContent = `$`+subtotal.toFixed(3);
+    resumenDescuento.textContent =`$`+descuento.toFixed(3);
+    resumenTotal.textContent = `$`+totalApagar.toFixed(3);
+    resumenDomicilio.textContent = `$`+domicilio.toFixed(3);
+}
+
+destino.addEventListener("change", (e) => {
+    resumenCompra();
+});
+
+//evento al boton pagar para guarda resumen en local storage
+btnResumen.addEventListener("click", () => {
+    //llamar los prodcuctos de local storage
+    let todosProductos = JSON.parse(localStorage.getItem("pro-carrito")) || [];
+    let resumen = {
+        //copia de todos los productos
+        "productos": todosProductos,
+    }
+    //llenar la variable del resumen con el resumen de la compra
+    resumen.subtotal = resumenSubTotal.textContent;
+    resumen.descuento = resumenDescuento.textContent;
+    resumen.destino = destino.value;
+    resumen.domicilio = resumenDomicilio.textContent;
+    resumen.totalApagar = resumenTotal.textContent;
+
+    //guardar el resumen en local storage
+    localStorage.setItem("pro-resumen", JSON.stringify(resumen));
+    //redireccionar a la pagina de pago
+    location.href = "checkout.html";
+    //console.log(resumen); 
+});
