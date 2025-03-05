@@ -9,12 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let resumenDomicilio = document.querySelector(".valor-domi");
     let resumenDestino = document.querySelector(".destino");
     let resumenOrden = document.querySelector(".productos-resumen");
+    let metodoPagoInputs = document.querySelectorAll("input[name='increment']");
 
     // Mostrar los datos en los elementos correspondientes
     if (resumen) {
         resumenSubTotal.textContent = resumen.subtotal || "$0.000";
         resumenDescuento.textContent = resumen.descuento || "$0.000";
-        resumenTotal.textContent = resumen.totalApagar || "$0.000";
+        resumenTotal.textContent = `$${(parseFloat(resumen.totalApagar.replace('$', '')) || 0).toFixed(3)}`;
         resumenDomicilio.textContent = resumen.domicilio || "$0.000";
         resumenDestino.textContent = resumen.destino || "";
 
@@ -41,4 +42,41 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     }
+
+    // Función para actualizar el total dependiendo del método de pago seleccionado
+    const actualizarTotal = () => {
+        let total = parseFloat(resumen.totalApagar.replace('$', ''));
+        
+        if (isNaN(total)) {
+            total = 0;
+        }
+
+        let metodoSeleccionado = document.querySelector("input[name='increment']:checked");
+
+        if (metodoSeleccionado) {
+            switch (metodoSeleccionado.value) {
+                case "1": // Contraentrega
+                    total *= 1.05;
+                    break;
+                case "2": // PSE
+                    total *= 1.03;
+                    break;
+                case "3": // Transferencia
+                    // No hay cambio en el total
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        resumenTotal.textContent = `$${total.toFixed(3)}`;
+    };
+
+    // Agregar evento a cada input de método de pago
+    metodoPagoInputs.forEach(input => {
+        input.addEventListener("change", actualizarTotal);
+    });
+
+    // Llamar a la función para establecer el total inicial
+    actualizarTotal();
 });
