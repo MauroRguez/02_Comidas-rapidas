@@ -80,3 +80,98 @@ document.addEventListener("DOMContentLoaded", () => {
     // Llamar a la función para establecer el total inicial
     actualizarTotal();
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const btnCheckout = document.getElementById('btn-checkout');
+    const totalElement = document.querySelector('.total');
+    const metodoPagoElements = document.getElementsByName('increment');
+
+    const nombresInput = document.getElementById('nombres-input');
+    const apellidosInput = document.getElementById('apellidos-input');
+    const emailInput = document.getElementById('email-input');
+    const celularInput = document.getElementById('celular-input');
+    const direccionInput = document.getElementById('direccion-input');
+
+    btnCheckout.addEventListener('click', function() {
+        const total = totalElement.textContent;
+        let metodoPago;
+
+        metodoPagoElements.forEach(element => {
+            if (element.checked) {
+                metodoPago = element.value;
+            }
+        });
+
+        // Validar que los campos obligatorios estén llenos
+        if (!nombresInput.value) {
+            alert('El campo "Nombres" es obligatorio');
+            return;
+        }
+        if (!apellidosInput.value) {
+            alert('El campo "Apellidos" es obligatorio');
+            return;
+        }
+        if (!emailInput.value) {
+            alert('El campo "Email" es obligatorio');
+            return;
+        }
+        if (!celularInput.value) {
+            alert('El campo "Celular" es obligatorio');
+            return;
+        }
+        if (!direccionInput.value) {
+            alert('El campo "Dirección" es obligatorio');
+            return;
+        }
+
+        const datosEntrega = {
+            nombres: nombresInput.value,
+            apellidos: apellidosInput.value,
+            email: emailInput.value,
+            celular: celularInput.value,
+            direccion: direccionInput.value,
+            direccion2: document.getElementById('direccion-2-input').value,
+            notas: document.getElementById('additiona-note').value
+        };
+
+        localStorage.setItem('datosEntrega', JSON.stringify(datosEntrega));
+
+        const resumen = JSON.parse(localStorage.getItem('pro-resumen')) || {};
+        resumen.totalApagar = total;
+        resumen.metodoPago = metodoPago;
+
+        localStorage.setItem('pro-resumen', JSON.stringify(resumen));
+
+        // Redirigir a la página de agradecimiento
+        window.location.href = 'thankyou.html';
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('checkout-form');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        let nombres = document.getElementById('nombres-input').value;
+        let apellidos = document.getElementById('apellidos-input').value;
+        let email = document.getElementById('email-input').value;
+        let celular = document.getElementById('celular-input').value;
+        let direccion = document.getElementById('direccion-input').value;
+        let direccion2 = document.getElementById('direccion-2-input').value;
+        let notas = document.getElementById('additiona-note').value;
+
+        let datosEntrega = {
+            nombres,
+            apellidos,
+            email,
+            celular,
+            direccion,
+            direccion2,
+            notas
+        };
+
+        localStorage.setItem('datosEntrega', JSON.stringify(datosEntrega));
+        alert('Datos guardados en el Local Storage');
+    });
+});

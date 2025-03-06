@@ -155,8 +155,6 @@ btnResumen.addEventListener("click", () => {
     resumen.destino = destino.value;
     resumen.domicilio = resumenDomicilio.textContent;
     resumen.totalApagar = resumenTotal.textContent;
-
-    //guardar el resumen en local storage
     localStorage.setItem("pro-resumen", JSON.stringify(resumen));
     //redireccionar a la pagina de pago
     location.href = "checkout.html";
