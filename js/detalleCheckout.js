@@ -13,9 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Mostrar los datos en los elementos correspondientes
     if (resumen) {
-        resumenSubTotal.textContent = resumen.subtotal || "$0.000";
+        let totalApagar = parseFloat(resumen.totalApagar.replace('$', '')) || 0;
+        let descuento = parseFloat(resumen.descuento.replace('$', '')) || 0;
+        let subtotal = totalApagar;
+
+        resumenSubTotal.textContent = `$${subtotal.toFixed(3)}`;
         resumenDescuento.textContent = resumen.descuento || "$0.000";
-        resumenTotal.textContent = `$${(parseFloat(resumen.totalApagar.replace('$', '')) || 0).toFixed(3)}`;
+        resumenTotal.textContent = `$${totalApagar.toFixed(3)}`;
         resumenDomicilio.textContent = resumen.domicilio || "$0.000";
         resumenDestino.textContent = resumen.destino || "";
 

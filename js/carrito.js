@@ -11,9 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 btnProducts.forEach((btn, i) => {
     btn.addEventListener("click", () => {
-        con++;
-        contadorCarrito.textContent = con;
-        guardarContadorCarrito();
         infoProducto(i);
     });
 });
@@ -31,6 +28,7 @@ function agregarProducto(producto) {
 
     localStorage.setItem('pro-carrito', JSON.stringify(todosProductos));
     cargarProLocalStorage();
+    actualizarContadorCarrito();
 }
 
 //funcion para agregar la informacion del producto al carrito
@@ -56,9 +54,7 @@ function borrarProducto(event){
     localStorage.setItem('pro-carrito', JSON.stringify(todosProductos));
 
     // Actualizar el contador del carrito
-    con = todosProductos.reduce((acc, producto) => acc + producto.cantidad, 0);
-    contadorCarrito.textContent = con;
-    guardarContadorCarrito();
+    actualizarContadorCarrito();
 
     // Actualizar los índices de los productos en el carrito
     let filas = listadoCarrito.querySelectorAll('tr');
@@ -101,8 +97,7 @@ function cargarProLocalStorage(){
         listadoCarrito.appendChild(fila);
     });
 
-    con = todosProductos.length;
-    contadorCarrito.textContent = con;
+    actualizarContadorCarrito();
 }
 
 //guardar contador del carrito en local storage
@@ -115,6 +110,14 @@ function cargarContadorCarrito(){
     let todosProductos = JSON.parse(localStorage.getItem('pro-carrito')) || [];
     con = todosProductos.reduce((acc, producto) => acc + producto.cantidad, 0);
     contadorCarrito.textContent = con;
+}
+
+//actualizar contador del carrito
+function actualizarContadorCarrito(){
+    let todosProductos = JSON.parse(localStorage.getItem('pro-carrito')) || [];
+    con = todosProductos.reduce((acc, producto) => acc + producto.cantidad, 0);
+    contadorCarrito.textContent = con;
+    guardarContadorCarrito();
 }
 
 contadorCarrito.parentElement.addEventListener('click', () => {
